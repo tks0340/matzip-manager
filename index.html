@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>맛집 메모</title>
+<style>
+:root{
+  --bg:#f6f1e8;
+  --card:#fffaf3;
+  --card-strong:#fffdf9;
+  --ink:#2f241a;
+  --muted:#7b6a58;
+  --line:rgba(89,62,34,.12);
+  --accent:#cf6037;
+  --accent-soft:rgba(207,96,55,.12);
+  --danger:#b13b2f;
+  --shadow:0 18px 45px rgba(72,49,28,.12);
+  --radius-xl:24px;
+  --radius-lg:18px;
+  --radius-md:14px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  color:var(--ink);
+  font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo",sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(207,96,55,.16), transparent 22%),
+    linear-gradient(180deg, #fbf7f1 0%, #f5eee4 55%, #f0e6d8 100%);
+}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+.app{
+  width:min(100%, 720px);
+  margin:0 auto;
+  min-height:100%;
+  padding:18px 14px 28px;
+}
+.hero{
+  background:var(--card-strong);
+  border:1px solid var(--line);
+  border-radius:var(--radius-xl);
+  box-shadow:var(--shadow);
+  padding:20px 18px;
+}
+.eyebrow{
+  display:inline-flex;
+  align-items:center;
+  padding:7px 11px;
+  border-radius:999px;
+  background:var(--accent-soft);
+  color:#944522;
+  font-size:12px;
+  font-weight:700;
+}
+h1{
+  margin:14px 0 8px;
+  font-size:31px;
+  line-height:1.06;
+  letter-spacing:-.05em;
+}
+.sub{
+  margin:0;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.7;
+}
+.toolbar{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:10px;
+  margin-top:16px;
+}
+.search,.field,.textarea{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:rgba(255,251,245,.96);
+  color:var(--ink);
+  outline:none;
+  transition:border-color .16s ease, box-shadow .16s ease, background .16s ease;
+}
+.search,.field{padding:13px 14px}
+.textarea{
+  padding:13px 14px;
+  min-height:116px;
+  resize:vertical;
+}
+.search:focus,.field:focus,.textarea:focus{
+  border-color:rgba(207,96,55,.45);
+  box-shadow:0 0 0 4px rgba(207,96,55,.12);
+  background:#fffdfa;
+}
+.btn{
+  border:none;
+  border-radius:16px;
+  padding:13px 16px;
+  background:#ece0cf;
+  color:var(--ink);
+  border:1px solid rgba(89,62,34,.08);
+}
+.btn.primary{
+  background:linear-gradient(135deg, var(--accent), #e68863);
+  color:#fff9f6;
+  font-weight:700;
+  border-color:transparent;
+}
+.btn.danger{
+  background:rgba(177,59,47,.1);
+  color:var(--danger);
+}
+.meta{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin:16px 4px 12px;
+  color:var(--muted);
+  font-size:13px;
+}
+.count{
+  font-weight:700;
+  color:var(--ink);
+}
+.list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.card{
+  width:100%;
+  text-align:left;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:20px;
+  box-shadow:var(--shadow);
+  padding:16px;
+}
+.card-title{
+  margin:0 0 6px;
+  font-size:18px;
+  letter-spacing:-.03em;
+}
+.card-food{
+  margin:0;
+  color:#5c4836;
+  font-size:14px;
+  line-height:1.6;
+}
+.card-address{
+  margin:10px 0 0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.6;
+}
+.card-date{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:12px;
+}
+.empty{
+  background:rgba(255,250,243,.8);
+  border:1px dashed rgba(89,62,34,.16);
+  border-radius:20px;
+  padding:22px 18px;
+  color:var(--muted);
+  line-height:1.7;
+  text-align:center;
+}
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(28,21,15,.44);
+  display:none;
+  align-items:flex-end;
+  justify-content:center;
+  padding:12px;
+}
+.overlay.open{display:flex}
+.sheet{
+  width:min(100%, 720px);
+  max-height:min(92vh, 860px);
+  overflow:auto;
+  background:var(--card-strong);
+  border-radius:26px 26px 18px 18px;
+  box-shadow:0 28px 70px rgba(0,0,0,.24);
+  border:1px solid var(--line);
+  padding:18px 16px 20px;
+}
+.sheet-bar{
+  width:54px;
+  height:5px;
+  border-radius:999px;
+  background:#ddccb7;
+  margin:0 auto 14px;
+}
+.sheet-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:14px;
+}
+.sheet-title{
+  margin:0;
+  font-size:22px;
+  letter-spacing:-.04em;
+}
+.sheet-sub{
+  margin-top:6px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.6;
+}
+.form{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.field-wrap{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+.label{
+  font-size:12px;
+  font-weight:700;
+  color:#665140;
+}
+.actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:6px;
+}
+.actions.single{
+  grid-template-columns:1fr;
+}
+.footer{
+  margin-top:16px;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.7;
+  text-align:center;
+}
+@media (max-width:560px){
+  .toolbar{grid-template-columns:1fr auto}
+  .btn{padding:13px 14px}
+  h1{font-size:28px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <section class="hero">
+    <span class="eyebrow">모바일용 심플 버전</span>
+    <h1>맛집 메모</h1>
+    <p class="sub">이름, 주소, 음식, 기타메모, 등록일만 간단하게 저장하고 검색할 수 있게 정리했습니다.</p>
+    <div class="toolbar">
+      <input id="searchInput" class="search" placeholder="이름, 주소, 음식, 메모 검색">
+      <button id="addBtn" class="btn primary" type="button">새로 추가</button>
+    </div>
+  </section>
+
+  <div class="meta">
+    <span>저장된 맛집</span>
+    <span id="countLabel" class="count">0개</span>
+  </div>
+
+  <section id="list" class="list"></section>
+
+  <p class="footer">카드를 누르면 열리고, 수정 후 저장하면 바로 반영됩니다.</p>
+</div>
+
+<div id="overlay" class="overlay" aria-hidden="true">
+  <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-bar"></div>
+    <div class="sheet-head">
+      <div>
+        <h2 id="sheetTitle" class="sheet-title">맛집 입력</h2>
+        <div class="sheet-sub">필요한 항목만 남겨서 스마트폰에서도 빠르게 적을 수 있게 했습니다.</div>
+      </div>
+      <button id="closeBtn" class="btn" type="button">닫기</button>
+    </div>
+
+    <form id="form" class="form">
+      <input id="recordId" type="hidden">
+      <label class="field-wrap">
+        <span class="label">이름</span>
+        <input id="name" class="field" required placeholder="예: 우진해장국">
+      </label>
+      <label class="field-wrap">
+        <span class="label">주소</span>
+        <input id="address" class="field" placeholder="예: 제주시 서사로 11">
+      </label>
+      <label class="field-wrap">
+        <span class="label">음식</span>
+        <input id="food" class="field" placeholder="예: 고사리해장국, 빈대떡">
+      </label>
+      <label class="field-wrap">
+        <span class="label">기타메모</span>
+        <textarea id="notes" class="textarea" placeholder="웨이팅, 맛, 다시 가고 싶은 이유 등을 적어두세요"></textarea>
+      </label>
+      <label class="field-wrap">
+        <span class="label">등록일</span>
+        <input id="dateAdded" class="field" type="date">
+      </label>
+      <div class="actions">
+        <button class="btn primary" type="submit">저장</button>
+        <button id="deleteBtn" class="btn danger" type="button">삭제</button>
+      </div>
+      <div class="actions single">
+        <button id="newFromSheetBtn" class="btn" type="button">새 입력으로 비우기</button>
+      </div>
+    </form>
+  </section>
+</div>
+
+<script>
+const STORAGE_KEY = "matzip-simple-records-v1";
+const today = () => new Date().toISOString().slice(0, 10);
+const supportsRandomUuid = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function";
+const makeId = () => supportsRandomUuid
+  ? crypto.randomUUID()
+  : `matzip-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
+
+const seedRecords = [
+  {
+    id: makeId(),
+    name: "우진해장국",
+    address: "제주시 서사로 11",
+    food: "고사리해장국, 녹두빈대떡",
+    notes: "웨이팅이 긴 편이라 애매한 시간대 방문 메모용",
+    dateAdded: today(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: makeId(),
+    name: "송정3대국밥",
+    address: "부산 부산진구 서면로68번길 33",
+    food: "돼지국밥, 수육백반",
+    notes: "서면 근처에서 빨리 한 끼 먹기 좋았던 곳",
+    dateAdded: today(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+];
+
+const els = {
+  list: document.getElementById("list"),
+  countLabel: document.getElementById("countLabel"),
+  searchInput: document.getElementById("searchInput"),
+  addBtn: document.getElementById("addBtn"),
+  overlay: document.getElementById("overlay"),
+  closeBtn: document.getElementById("closeBtn"),
+  form: document.getElementById("form"),
+  recordId: document.getElementById("recordId"),
+  name: document.getElementById("name"),
+  address: document.getElementById("address"),
+  food: document.getElementById("food"),
+  notes: document.getElementById("notes"),
+  dateAdded: document.getElementById("dateAdded"),
+  deleteBtn: document.getElementById("deleteBtn"),
+  newFromSheetBtn: document.getElementById("newFromSheetBtn")
+};
+
+let records = loadRecords();
+let selectedId = null;
+
+function loadRecords(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(seedRecords));
+      return normalizeRecords(seedRecords);
+    }
+    const parsed = JSON.parse(raw);
+    if(Array.isArray(parsed) && parsed.length){
+      return normalizeRecords(parsed);
+    }
+  }catch(error){
+    console.error(error);
+  }
+
+  const migrated = migrateLegacyRecords();
+  if(migrated.length){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+    return normalizeRecords(migrated);
+  }
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(seedRecords));
+  return normalizeRecords(seedRecords);
+}
+
+function migrateLegacyRecords(){
+  const legacyKeys = ["matzip-manager-records-v1"];
+  for(const key of legacyKeys){
+    try{
+      const raw = localStorage.getItem(key);
+      if(!raw) continue;
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed) && parsed.length){
+        return parsed.map((item) => ({
+          id: String(item.id || makeId()),
+          name: String(item.name || "").trim(),
+          address: String(item.address || "").trim(),
+          food: String(item.food || item.recommendedMenu || item.menuBoard || item.price || "").trim(),
+          notes: String(item.notes || item.sourceSummary || "").trim(),
+          dateAdded: String(item.dateAdded || today()),
+          createdAt: String(item.createdAt || new Date().toISOString()),
+          updatedAt: String(item.updatedAt || new Date().toISOString())
+        }));
+      }
+    }catch(error){
+      console.error(error);
+    }
+  }
+  return [];
+}
+
+function normalizeRecords(items){
+  return items.map((item) => ({
+    id: String(item.id || makeId()),
+    name: String(item.name || "").trim(),
+    address: String(item.address || "").trim(),
+    food: String(item.food || "").trim(),
+    notes: String(item.notes || "").trim(),
+    dateAdded: String(item.dateAdded || today()),
+    createdAt: String(item.createdAt || new Date().toISOString()),
+    updatedAt: String(item.updatedAt || new Date().toISOString())
+  })).sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""));
+}
+
+function saveRecords(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+}
+
+function filteredRecords(){
+  const keyword = els.searchInput.value.trim().toLowerCase();
+  if(!keyword) return records;
+  return records.filter((record) => {
+    const text = [record.name, record.address, record.food, record.notes, record.dateAdded].join(" ").toLowerCase();
+    return text.includes(keyword);
+  });
+}
+
+function escapeHtml(value){
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function openSheet(record = null){
+  selectedId = record?.id ?? null;
+  els.recordId.value = record?.id ?? "";
+  els.name.value = record?.name ?? "";
+  els.address.value = record?.address ?? "";
+  els.food.value = record?.food ?? "";
+  els.notes.value = record?.notes ?? "";
+  els.dateAdded.value = record?.dateAdded ?? today();
+  els.deleteBtn.style.display = record ? "block" : "none";
+  els.overlay.classList.add("open");
+  els.overlay.setAttribute("aria-hidden", "false");
+  setTimeout(() => els.name.focus(), 30);
+}
+
+function closeSheet(){
+  els.overlay.classList.remove("open");
+  els.overlay.setAttribute("aria-hidden", "true");
+}
+
+function clearForm(){
+  selectedId = null;
+  els.recordId.value = "";
+  els.form.reset();
+  els.dateAdded.value = today();
+  els.deleteBtn.style.display = "none";
+}
+
+function render(){
+  const items = filteredRecords();
+  els.countLabel.textContent = `${records.length}개`;
+
+  if(!items.length){
+    els.list.innerHTML = `<div class="empty">검색 결과가 없습니다.<br>오른쪽 위의 "새로 추가"로 바로 적어보세요.</div>`;
+    return;
+  }
+
+  els.list.innerHTML = items.map((record) => `
+    <button type="button" class="card" data-id="${record.id}">
+      <h3 class="card-title">${escapeHtml(record.name || "이름 없음")}</h3>
+      <p class="card-food">${escapeHtml(record.food || "음식 미입력")}</p>
+      <p class="card-address">${escapeHtml(record.address || "주소 미입력")}</p>
+      <div class="card-date">등록일 ${escapeHtml(record.dateAdded || "-")}</div>
+    </button>
+  `).join("");
+
+  els.list.querySelectorAll(".card").forEach((button) => {
+    button.addEventListener("click", () => {
+      const record = records.find((item) => item.id === button.dataset.id);
+      openSheet(record || null);
+    });
+  });
+}
+
+els.addBtn.addEventListener("click", () => {
+  clearForm();
+  openSheet();
+});
+
+els.closeBtn.addEventListener("click", closeSheet);
+
+els.overlay.addEventListener("click", (event) => {
+  if(event.target === els.overlay){
+    closeSheet();
+  }
+});
+
+els.newFromSheetBtn.addEventListener("click", () => {
+  clearForm();
+  els.name.focus();
+});
+
+els.searchInput.addEventListener("input", render);
+
+els.form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const name = els.name.value.trim();
+  if(!name){
+    alert("이름은 꼭 입력해주세요.");
+    return;
+  }
+
+  const now = new Date().toISOString();
+  const payload = {
+    id: els.recordId.value || makeId(),
+    name,
+    address: els.address.value.trim(),
+    food: els.food.value.trim(),
+    notes: els.notes.value.trim(),
+    dateAdded: els.dateAdded.value || today(),
+    createdAt: records.find((item) => item.id === els.recordId.value)?.createdAt || now,
+    updatedAt: now
+  };
+
+  const existingIndex = records.findIndex((item) => item.id === payload.id);
+  if(existingIndex >= 0){
+    records[existingIndex] = payload;
+  }else{
+    records.unshift(payload);
+  }
+
+  records = normalizeRecords(records);
+  saveRecords();
+  render();
+  closeSheet();
+});
+
+els.deleteBtn.addEventListener("click", () => {
+  const id = els.recordId.value;
+  if(!id) return;
+  const target = records.find((item) => item.id === id);
+  if(!target) return;
+  if(!confirm(`"${target.name}"을(를) 삭제할까요?`)) return;
+  records = records.filter((item) => item.id !== id);
+  saveRecords();
+  render();
+  clearForm();
+  closeSheet();
+});
+
+document.addEventListener("keydown", (event) => {
+  if(event.key === "Escape"){
+    closeSheet();
+  }
+});
+
+clearForm();
+render();
+</script>
+</body>
+</html>
